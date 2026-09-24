@@ -344,7 +344,7 @@ const HTML = `<!DOCTYPE html>
         const res = await fetch('/api/restore', { method: 'POST' });
         const data = await res.json();
         if (data.success) {
-          showToast('Đã khôi phục cài đặt gốc thành công!', 'success', 3500);
+          showToast('Đã khôi phục cài đặt gốc! Đang tự động mở IELTS Bro...', 'success', 3500);
         } else {
           showToast('Lỗi: ' + (data.error || 'Thất bại'), 'error', 4500);
         }
@@ -402,6 +402,9 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'POST' && req.url === '/api/restore') {
     try {
       await restore();
+      setTimeout(() => {
+        launchApp();
+      }, 600);
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: true }));
     } catch (err) {
