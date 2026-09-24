@@ -90,13 +90,4 @@ Nếu bạn thấy công cụ này hữu ích và tiết kiệm thời gian cho 
 ---
 
 ## 📜 Giấy Phép & Bản Quyền (License)
-
-Dự án này được cấp phép với các điều kiện cụ thể sau:
-
-1. **Mã nguồn (Source Code)**:
-   - Được phép tự do sử dụng, chỉnh sửa, phát triển tiếp hoặc tích hợp vào các dự án khác với điều kiện **bắt buộc phải ghi rõ nguồn và tác giả gốc** (Nguyễn Mạnh Hùng - [ManhHung110106](https://github.com/ManhHung110106)).
-2. **Hình ảnh & Logo (Branding Assets)**:
-   - Toàn bộ hình ảnh, biểu tượng (`logo.png`, thư mục `icons/`, và các ấn phẩm thiết kế giao diện) thuộc quyền sở hữu trí tuệ độc quyền của tác giả.
-   - **Nghiêm cấm** sao chép, sử dụng lại hoặc lạm dụng bộ nhận diện/logo này dưới bất kỳ hình thức nào (kể cả hoạt động thương mại có lợi nhuận hoặc phi lợi nhuận) nếu **chưa có sự đồng ý bằng văn bản** từ tác giả.
-
 Chi tiết xem tại file [LICENSE](LICENSE).
