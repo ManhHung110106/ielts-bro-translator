@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>IELTS Bro Web Translator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      width: 280px;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background: #ffffff;
+      color: #0f172a;
+      padding: 18px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .section-title {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #64748b;
+      margin-bottom: 10px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .btn-lang {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 8px;
+      background: #ffffff;
+      border: 1.5px solid #ea580c;
+      border-radius: 8px;
+      color: #ea580c;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-lang:hover, .btn-lang.active {
+      background: #ea580c;
+      color: #ffffff;
+    }
+
+    .btn-restore {
+      width: 100%;
+      padding: 8px 12px;
+      background: #ffffff;
+      border: 1px solid #fecaca;
+      border-radius: 6px;
+      color: #dc2626;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      margin-bottom: 16px;
+    }
+
+    .btn-restore:hover {
+      background: #fef2f2;
+      border-color: #f87171;
+    }
+
+    .footer {
+      border-top: 1px solid #e2e8f0;
+      padding-top: 12px;
+      text-align: center;
+    }
+
+    .github-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #64748b;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .github-link:hover {
+      color: #ea580c;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="icons/icon48.png" alt="Logo" class="logo">
+    <div class="title">IELTS Bro Web</div>
+  </div>
+
+  <div class="section-title">Chọn ngôn ngữ dịch:</div>
+
+  <div class="btn-group">
+    <button class="btn-lang" id="btn-vi">
+      <span>🇻🇳</span>
+      <span>Tiếng Việt</span>
+    </button>
+    <button class="btn-lang" id="btn-en">
+      <span>🇬🇧</span>
+      <span>Tiếng Anh</span>
+    </button>
+  </div>
+
+  <button class="btn-restore" id="btn-restore">↺ Khôi phục gốc (Tắt dịch)</button>
+
+  <div class="footer">
+    <a href="https://github.com/ManhHung110106/ielts-bro-translator" target="_blank" class="github-link">
+      <span>⭐ Ủng hộ trên GitHub</span>
+    </a>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

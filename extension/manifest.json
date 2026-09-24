@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "IELTS Bro Web Translator",
+  "version": "1.0.0",
+  "description": "Dịch giao diện trang web luyện thi IELTS Bro (雅思哥) sang Tiếng Việt và Tiếng Anh.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "IELTS Bro Web Translator",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png"
+    }
+  },
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://*.ieltsbro.com/*",
+    "https://translate.googleapis.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.ieltsbro.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_start"
+    }
+  ]
+}
