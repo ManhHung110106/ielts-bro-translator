@@ -38,7 +38,6 @@ const HTML = `<!DOCTYPE html>
       --accent-border: #fed7aa;
       --text-main: #0f172a;
       --text-muted: #64748b;
-      --text-light: #94a3b8;
       --surface: #f8fafc;
       --success: #15803d;
       --success-bg: #f0fdf4;
@@ -71,7 +70,7 @@ const HTML = `<!DOCTYPE html>
       max-width: 520px;
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 32px;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -2px rgba(0, 0, 0, 0.02);
     }
@@ -86,12 +85,12 @@ const HTML = `<!DOCTYPE html>
     }
 
     .app-logo {
-      width: 48px;
-      height: 48px;
+      width: 52px;
+      height: 52px;
       object-fit: contain;
-      border-radius: 8px;
+      border-radius: 10px;
       border: 1px solid var(--card-border);
-      padding: 4px;
+      padding: 3px;
       background: #ffffff;
     }
 
@@ -105,7 +104,7 @@ const HTML = `<!DOCTYPE html>
     .header-text p {
       font-size: 13px;
       color: var(--text-muted);
-      margin-top: 2px;
+      margin-top: 3px;
     }
 
     .info-callout {
@@ -296,7 +295,7 @@ const HTML = `<!DOCTYPE html>
 
   <div class="app-card">
     <div class="brand-header">
-      <img src="/logo_white.png" alt="Logo" class="app-logo" onerror="this.src='/logo.png'">
+      <img src="/logo.png" alt="Logo" class="app-logo">
       <div class="header-text">
         <h1>IELTS Bro UI Translator</h1>
         <p>Bản dịch giao diện ứng dụng 雅思哥 (IELTS Bro Desktop)</p>
@@ -315,7 +314,7 @@ const HTML = `<!DOCTYPE html>
       <button class="btn btn-accent" onclick="applyLang('vi')">
         <div>
           <span class="btn-title">Cài đặt giao diện Tiếng Việt</span>
-          <span class="btn-desc">Dịch toàn bộ Menu, Nút bấm & Bảng điều khiển sang Tiếng Việt</span>
+          <span class="btn-desc">Dịch Menu, Nút bấm & Bảng điều khiển sang Tiếng Việt</span>
         </div>
         <span class="btn-icon">→</span>
       </button>
@@ -323,7 +322,7 @@ const HTML = `<!DOCTYPE html>
       <button class="btn btn-secondary" onclick="applyLang('en')">
         <div>
           <span class="btn-title">Cài đặt giao diện Tiếng Anh</span>
-          <span class="btn-desc">Translate application interface and controls to English</span>
+          <span class="btn-desc">Translate application controls and navigation to English</span>
         </div>
         <span class="btn-icon">→</span>
       </button>
@@ -340,11 +339,11 @@ const HTML = `<!DOCTYPE html>
     <div class="notice-box">
       <div class="notice-row">
         <span class="notice-bullet">•</span>
-        <span><strong>Tự động dịch thông minh:</strong> Tích hợp dịch kết hợp (Hybrid Dictionary + Cloud Translation API).</span>
+        <span><strong>Dịch tự động Hybrid:</strong> Kết hợp từ điển chuyên ngành và tự động dịch câu từ mới.</span>
       </div>
       <div class="notice-row">
         <span class="notice-bullet">•</span>
-        <span><strong>Bảo vệ đề thi:</strong> Giữ nguyên 100% đề thi tiếng Anh (Reading, Listening, câu hỏi trắc nghiệm).</span>
+        <span><strong>Bảo vệ đề thi:</strong> Giữ nguyên 100% bài đọc, bài nghe và câu hỏi tiếng Anh.</span>
       </div>
       <div class="notice-row">
         <span class="notice-bullet">•</span>
@@ -410,10 +409,8 @@ const HTML = `<!DOCTYPE html>
 `;
 
 const server = http.createServer(async (req, res) => {
-  // Static logo routes
-  if (req.method === 'GET' && (req.url === '/logo.png' || req.url === '/logo_white.png')) {
-    const filename = req.url.slice(1);
-    const filePath = path.join(__dirname, filename);
+  if (req.method === 'GET' && req.url === '/logo.png') {
+    const filePath = path.join(__dirname, 'logo.png');
     if (fs.existsSync(filePath)) {
       res.writeHead(200, { 'Content-Type': getMimeType(filePath) });
       fs.createReadStream(filePath).pipe(res);

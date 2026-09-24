@@ -1,59 +1,36 @@
 # 🎓 IELTS Bro (雅思哥) UI Translator
 
-Công cụ chuyển đổi giao diện ứng dụng desktop **IELTS Bro (雅思哥机考软件)** từ tiếng Trung sang **Tiếng Việt** hoặc **Tiếng Anh**.
+> **Chuyển đổi giao diện ứng dụng IELTS Bro Desktop (雅思哥机考软件) từ tiếng Trung sang Tiếng Việt & Tiếng Anh.**
 
 <p align="center">
-  <img src="logo.png" width="90" alt="IELTS Bro Translator Logo" /><br/>
-  <img src="https://img.shields.io/badge/Giao_di%E1%BB%87n-Minimalist_GUI-ea580c?style=flat-square" alt="GUI" />
-  <img src="https://img.shields.io/badge/C%C6%A1_ch%E1%BA%BF-Hybrid_Translation-success?style=flat-square" alt="Translation" />
-  <img src="https://img.shields.io/badge/H%E1%BB%87_%C4%91i%E1%BB%81u_h%C3%A0nh-Windows_10%2F11-0078D6?style=flat-square" alt="Windows" />
+  <img src="logo.png" width="80" alt="IELTS Bro Translator Logo" /><br/>
+  <a href="https://github.com/ManhHung110106/ielts-bro-translator/stargazers">
+    <img src="https://img.shields.io/github/stars/ManhHung110106/ielts-bro-translator?style=social" alt="GitHub Stars" />
+  </a>
 </p>
 
 ---
 
 ## 🌟 Tính Năng Nổi Bật
 
-- 🖥️ **Giao diện tối giản, thanh lịch**: Tông màu chủ đạo trắng - đỏ cam, loại bỏ hoàn toàn các hiệu ứng rườm rà (AI slop), hiển thị logo nhận diện ứng dụng.
-- 🌐 **Cơ chế Dịch Kết hợp (Hybrid Translation Engine)**:
-  - **Từ điển chuyên ngành IELTS**: Đảm bảo các thuật ngữ (Listening, Reading, Task 1, Task 2, Cam, Forecast) chuẩn xác 100%.
-  - **Tự động dịch đám mây (Dynamic Cloud Translation)**: Bất kỳ câu từ tiếng Trung mới nào phát sinh mà chưa có trong từ điển sẽ được tự động dịch và lưu vào bộ nhớ đệm (Cache) trên máy.
-- 🎯 **Bảo toàn 100% đề thi**: Giữ nguyên bài đọc Reading, bài nghe Listening, bài mẫu Writing và câu hỏi trắc nghiệm tiếng Anh, không gây ảnh hưởng đến việc ôn thi.
-- 🛡️ **An toàn & Hoàn tác 1-Click**:
-  - Tự động tạo bản sao lưu `app.asar.bak`.
-  - Hỗ trợ nút khôi phục về tiếng Trung nguyên bản bất cứ lúc nào.
+- **Dịch Tiếng Việt & Tiếng Anh**: Tự động chuyển đổi toàn bộ menu, nút bấm, cài đặt, phiếu trả lời sang Tiếng Việt hoặc Tiếng Anh.
+- **Giữ nguyên 100% đề thi**: Bài đọc Reading, bài nghe Listening, bài mẫu và câu hỏi trắc nghiệm tiếng Anh được **giữ nguyên bản**, không lo dịch nhầm đề thi.
+- **Dịch tự động Hybrid**: Kết hợp từ điển thuật ngữ chuẩn IELTS với cơ chế tự động dịch trực tuyến các câu từ mới.
+- **An toàn tuyệt đối**: Tự động tạo bản sao lưu (`app.asar.bak`), hoàn tác về tiếng Trung ban đầu bất cứ lúc nào.
 
 ---
 
-## 🛠️ Yêu Cầu Hệ Thống
+## 🚀 Hướng Dẫn Sử Dụng (Cực Kỳ Đơn Giản)
 
-- **Hệ điều hành**: Windows 10 / 11
-- **Môi trường**: Đã cài đặt [Node.js](https://nodejs.org)
-- Đã cài đặt ứng dụng **雅思哥机考软件** (IELTS Bro Desktop)
-
----
-
-## 🚀 Hướng Dẫn Sử Dụng
-
-1. Tải repository này về máy tính (hoặc `git clone https://github.com/ManhHung110106/ielts-bro-translator.git`).
-2. Mở thư mục và click đúp vào file **`run_translator.bat`**.
-3. Cửa sổ ứng dụng sẽ tự động mở lên:
-   - Nhấn **Cài đặt giao diện Tiếng Việt** để dịch sang Tiếng Việt.
-   - Nhấn **Cài đặt giao diện Tiếng Anh** để dịch sang Tiếng Anh.
-   - Nhấn **Khôi phục giao diện gốc** nếu muốn quay về tiếng Trung.
-4. Mở lại ứng dụng **IELTS Bro** để trải nghiệm giao diện mới!
+1. Tải dự án này về máy ([Tải file ZIP](https://github.com/ManhHung110106/ielts-bro-translator/archive/refs/heads/main.zip) hoặc `git clone`).
+2. Mở thư mục và click đúp vào **`run_translator.bat`**.
+3. Cửa sổ ứng dụng sẽ mở lên:
+   - Bấm **Cài đặt giao diện Tiếng Việt** (hoặc Tiếng Anh).
+   - Đợi 2 giây hiển thị thông báo thành công.
+4. Mở ứng dụng **IELTS Bro** và tận hưởng giao diện mới!
 
 ---
 
-## 📁 Cấu Trúc Dự Án
+## ⭐ Ủng Hộ Dự Án
 
-```text
-├── run_translator.bat  # Trình khởi chạy 1-click mở ứng dụng
-├── gui_server.js       # Máy chủ giao diện Minimalist trắng - đỏ cam
-├── patcher.js          # Logic đóng/gói và cập nhật app.asar
-├── translator.js       # Bộ máy dịch Hybrid (Từ điển chuẩn + Dịch động)
-├── dict_vi.json        # Từ điển thuật ngữ IELTS Tiếng Việt
-├── dict_en.json        # Từ điển thuật ngữ IELTS Tiếng Anh
-├── logo.png            # Icon nhận diện ứng dụng
-├── logo_white.png      # Logo hiển thị trong giao diện
-└── README.md           # Tài liệu hướng dẫn
-```
+Nếu dự án này giúp ích cho quá trình luyện thi IELTS của bạn, hãy dành tặng dự án **1 sao (⭐ Star)** ở góc phải trên cùng của GitHub nhé! Sự ủng hộ của bạn là động lực lớn để hoàn thiện công cụ ngày một tốt hơn.
