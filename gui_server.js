@@ -30,40 +30,85 @@ function saveConfig(cfg) {
   } catch (e) {}
 }
 
-function openWindowsDialog(type = 'file') {
+let activeDialogProcess = null;
+
+function openWindowsFolderDialog(initialPath = '') {
   return new Promise((resolve) => {
-    let script = '';
-    if (type === 'folder') {
-      script = `
-        Add-Type -AssemblyName System.Windows.Forms
-        $fbd = New-Object System.Windows.Forms.FolderBrowserDialog
-        $fbd.Description = "Chọn thư mục cài đặt IELTS Bro (yasige)"
-        $fbd.ShowNewFolderButton = $false
-        if ($fbd.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
-          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          Write-Output $fbd.SelectedPath
-        }
-      `;
-    } else {
-      script = `
-        Add-Type -AssemblyName System.Windows.Forms
-        $ofd = New-Object System.Windows.Forms.OpenFileDialog
-        $ofd.Title = "Chọn tệp app.asar hoặc yasige.exe"
-        $ofd.Filter = "IELTS Bro Files (*.asar;*.exe)|*.asar;*.exe|All Files (*.*)|*.*"
-        $ofd.InitialDirectory = "C:\\Program Files\\yasige"
-        if ($ofd.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
-          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          Write-Output $ofd.FileName
-        }
-      `;
+    if (activeDialogProcess) {
+      try {
+        activeDialogProcess.kill();
+      } catch (e) {}
+      activeDialogProcess = null;
     }
+
+    let cleanInit = (initialPath || 'C:\\Program Files\\yasige').trim().replace(/^["']|["']$/g, '');
+    try {
+      if (fs.existsSync(cleanInit)) {
+        const stat = fs.statSync(cleanInit);
+        if (!stat.isDirectory()) {
+          cleanInit = path.dirname(cleanInit);
+        }
+      } else {
+        cleanInit = 'C:\\Program Files\\yasige';
+      }
+    } catch (e) {
+      cleanInit = 'C:\\Program Files\\yasige';
+    }
+
+    const script = `
+      Add-Type -AssemblyName System.Windows.Forms
+      $form = New-Object System.Windows.Forms.Form
+      $form.TopMost = $true
+      $form.TopLevel = $true
+      $form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
+      $form.ShowInTaskbar = $false
+      $form.Opacity = 0
+      $form.Show()
+      $form.BringToFront()
+
+      $fbd = New-Object System.Windows.Forms.FolderBrowserDialog
+      $fbd.Description = "Chọn thư mục cài đặt IELTS Bro (chứa yasige.exe hoặc app.asar)"
+      $fbd.ShowNewFolderButton = $false
+      $fbd.RootFolder = [System.Environment+SpecialFolder]::MyComputer
+      $init = "${cleanInit.replace(/\\/g, '\\\\').replace(/"/g, '`"')}"
+      if (Test-Path $init) {
+        $fbd.SelectedPath = $init
+      }
+
+      $res = $fbd.ShowDialog($form)
+      if ($res -eq [System.Windows.Forms.DialogResult]::OK) {
+        [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+        Write-Output $fbd.SelectedPath
+      }
+      $form.Close()
+      $form.Dispose()
+    `;
+
     const child = spawn('powershell', ['-NoProfile', '-STA', '-Command', script]);
+    activeDialogProcess = child;
+
     let stdout = '';
     child.stdout.on('data', d => stdout += d.toString());
+
+    const timer = setTimeout(() => {
+      try { child.kill(); } catch (e) {}
+    }, 90000);
+
     child.on('close', () => {
+      clearTimeout(timer);
+      if (activeDialogProcess === child) {
+        activeDialogProcess = null;
+      }
       resolve(stdout.trim());
     });
-    child.on('error', () => resolve(''));
+
+    child.on('error', () => {
+      clearTimeout(timer);
+      if (activeDialogProcess === child) {
+        activeDialogProcess = null;
+      }
+      resolve('');
+    });
   });
 }
 
@@ -214,15 +259,15 @@ const HTML = `<!DOCTYPE html>
     .btn-action-small {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      padding: 6px 10px;
+      gap: 5px;
+      padding: 7px 12px;
       background: #ffffff;
       border: 1px solid var(--card-border);
       border-radius: 6px;
       font-family: inherit;
       font-size: 12px;
       font-weight: 600;
-      color: var(--text-muted);
+      color: var(--text-main);
       cursor: pointer;
       transition: all 0.15s ease;
       outline: none;
@@ -236,6 +281,11 @@ const HTML = `<!DOCTYPE html>
 
     .btn-action-small:active {
       transform: scale(0.98);
+    }
+
+    .btn-action-small:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
 
     .path-status {
@@ -460,7 +510,6 @@ const HTML = `<!DOCTYPE html>
       </div>
       <div class="path-btn-row">
         <button type="button" class="btn-action-small" id="btnBrowseFolder" title="Duyệt thư mục yasige">📁 Chọn thư mục</button>
-        <button type="button" class="btn-action-small" id="btnBrowseFile" title="Chọn tệp app.asar hoặc yasige.exe">📂 Chọn tệp</button>
         <button type="button" class="btn-action-small" id="btnDefaultPath" title="Khôi phục đường dẫn mặc định">↺ Mặc định</button>
       </div>
       <div class="path-status">
@@ -505,7 +554,6 @@ const HTML = `<!DOCTYPE html>
     const statusDot = document.getElementById('statusDot');
     const statusText = document.getElementById('statusText');
     const btnBrowseFolder = document.getElementById('btnBrowseFolder');
-    const btnBrowseFile = document.getElementById('btnBrowseFile');
     const btnDefaultPath = document.getElementById('btnDefaultPath');
 
     let defaultPathVal = 'C:\\\\Program Files\\\\yasige';
@@ -561,32 +609,25 @@ const HTML = `<!DOCTYPE html>
     });
 
     btnBrowseFolder.addEventListener('click', async () => {
-      showToast('Đang mở hộp thoại chọn thư mục...', 'loading', 2000);
+      btnBrowseFolder.disabled = true;
+      btnBrowseFolder.innerText = '⏳ Đang mở...';
+      showToast('Đang mở hộp thoại chọn thư mục (vui lòng kiểm tra màn hình)...', 'loading', 0);
       try {
-        const res = await fetch('/api/browse-folder');
+        const curPath = encodeURIComponent(pathInput.value.trim());
+        const res = await fetch('/api/browse-folder?current=' + curPath);
         const data = await res.json();
         if (data && data.path) {
           pathInput.value = data.path;
           checkPathStatus(data.path);
-          showToast('Đã chọn thư mục!', 'success', 2000);
+          showToast('Đã chọn thư mục thành công!', 'success', 2500);
+        } else {
+          showToast('Chưa chọn thư mục hoặc đã hủy.', 'loading', 2000);
         }
       } catch (err) {
-        showToast('Lỗi chọn thư mục: ' + err.message, 'error', 3000);
-      }
-    });
-
-    btnBrowseFile.addEventListener('click', async () => {
-      showToast('Đang mở hộp thoại chọn tệp...', 'loading', 2000);
-      try {
-        const res = await fetch('/api/browse-file');
-        const data = await res.json();
-        if (data && data.path) {
-          pathInput.value = data.path;
-          checkPathStatus(data.path);
-          showToast('Đã chọn tệp!', 'success', 2000);
-        }
-      } catch (err) {
-        showToast('Lỗi chọn tệp: ' + err.message, 'error', 3000);
+        showToast('Lỗi: ' + err.message, 'error', 3500);
+      } finally {
+        btnBrowseFolder.disabled = false;
+        btnBrowseFolder.innerText = '📁 Chọn thư mục';
       }
     });
 
@@ -710,7 +751,8 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === 'GET' && pathname === '/api/browse-folder') {
     try {
-      const chosenPath = await openWindowsDialog('folder');
+      const currentParam = parsedUrl.searchParams.get('current');
+      const chosenPath = await openWindowsFolderDialog(currentParam || loadConfig().appPath);
       if (chosenPath) {
         const cfg = loadConfig();
         cfg.appPath = chosenPath;
@@ -725,20 +767,10 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  if (req.method === 'GET' && pathname === '/api/browse-file') {
-    try {
-      const chosenPath = await openWindowsDialog('file');
-      if (chosenPath) {
-        const cfg = loadConfig();
-        cfg.appPath = chosenPath;
-        saveConfig(cfg);
-      }
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ path: chosenPath }));
-    } catch (err) {
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: err.message }));
-    }
+  if (req.method === 'GET' && pathname === '/api/shutdown') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: true, message: 'Server shutting down' }));
+    setTimeout(() => process.exit(0), 100);
     return;
   }
 

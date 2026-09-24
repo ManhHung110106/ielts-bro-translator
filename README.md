@@ -59,7 +59,7 @@ Nhằm hỗ trợ cộng đồng người Việt tự học và ôn luyện IELT
 1. Tải dự án này về máy ([Tải bản Release v1.0.0 (ZIP)](https://github.com/ManhHung110106/ielts-bro-translator/releases/latest) hoặc `git clone`).
 2. Mở thư mục và click đúp vào file **`run_translator.bat`**.
 3. Cửa sổ ứng dụng sẽ mở lên:
-   - Nếu bạn cài đặt IELTS Bro ở thư mục hoặc ổ đĩa khác (không phải `C:\Program Files\yasige`), chỉ cần nhấn **📁 Chọn thư mục** hoặc **📂 Chọn tệp** để chọn nơi cài đặt của bạn.
+   - Nếu bạn cài đặt IELTS Bro ở thư mục hoặc ổ đĩa khác (không phải `C:\Program Files\yasige`), chỉ cần nhấn **📁 Chọn thư mục** để chọn nơi cài đặt của bạn.
    - Nhấn **🇻🇳 Tiếng Việt** hoặc **🇬🇧 Tiếng Anh**.
    - Ứng dụng IELTS Bro sẽ **tự động được mở lên** với giao diện mới!
    - *(Khi cần quay về tiếng Trung, chỉ cần nhấn **Khôi phục cài đặt gốc**).*
