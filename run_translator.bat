@@ -1,12 +1,11 @@
-﻿@echo off
-chcp 65001 >nul
-title IELTS Bro UI Translator (Tieng Viet / English)
+@echo off
+title IELTS Bro UI Translator
 
 :: Check administrator privileges
 net session >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [THÔNG BÁO] Yêu cầu quyền Administrator để chỉnh sửa file trong Program Files.
-    echo Đang tự động xin quyền Run as Administrator...
+    echo [THONG BAO] Yeu cau quyen Administrator de chinh sua file trong Program Files.
+    echo Dang tu dong xin quyen Run as Administrator...
     powershell -Command "Start-Process '%~f0' -Verb RunAs"
     exit /b
 )
@@ -16,55 +15,58 @@ cd /d "%~dp0"
 :MENU
 cls
 echo ========================================================
-echo       IELTS BRO (雅思哥) UI TRANSLATOR / BẢN DỊCH GIAO DIỆN
+echo       IELTS BRO UI TRANSLATOR / BAN DICH GIAO DIEN
 echo ========================================================
-echo  Ứng dụng hỗ trợ chuyển đổi giao diện IELTS Bro sang Tiếng Việt / Anh.
-echo  Đặc biệt: Giữ nguyên 100%% nội dung đề thi tiếng Anh (Reading, Listening,...)
+echo  Ung dung ho tro chuyen doi giao dien IELTS Bro sang Tieng Viet / Anh.
+echo  Dac biet: Giu nguyen 100%% noi dung de thi tieng Anh (Reading, Listening,...)
 echo ========================================================
 echo.
-echo  [1] Cài đặt bản dịch TIẾNG VIỆT (Vietnamese)
-echo  [2] Cài đặt bản dịch TIẾNG ANH (English)
-echo  [3] Khôi phục giao diện gốc ban đầu (Restore Original)
-echo  [4] Thoát
+echo  [1] Cai dat ban dich TIENG VIET (Vietnamese)
+echo  [2] Cai dat ban dich TIENG ANH (English)
+echo  [3] Khoi phuc giao dien goc ban dau (Restore Original)
+echo  [4] Thoat
 echo.
-set /p choice="Nhập lựa chọn của bạn [1-4]: "
+set /p choice="Nhap lua chon cua ban [1-4]: "
 
 if "%choice%"=="1" goto INSTALL_VI
 if "%choice%"=="2" goto INSTALL_EN
 if "%choice%"=="3" goto RESTORE
 if "%choice%"=="4" goto EXIT
 
-echo Lựa chọn không hợp lệ!
+echo Lua chon khong hop le!
 pause
 goto MENU
 
 :INSTALL_VI
 cls
-echo Đang áp dụng bản dịch TIẾNG VIỆT...
-taskkill /F /IM "雅思哥机考软件.exe" >nul 2>&1
+echo Dang ap dung ban dich TIENG VIET...
+taskkill /F /FI "IMAGENAME eq *yasi*" >nul 2>&1
+powershell -Command "Get-Process | Where-Object { .Path -like '*yasige*' } | Stop-Process -Force -ErrorAction SilentlyContinue"
 node patcher.js patch vi
 echo.
-echo Hoàn tất! Vui lòng khởi động lại ứng dụng IELTS Bro.
+echo Hoan tat! Vui long khoi dong lai ung dung IELTS Bro.
 pause
 goto MENU
 
 :INSTALL_EN
 cls
-echo Đang áp dụng bản dịch TIẾNG ANH...
-taskkill /F /IM "雅思哥机考软件.exe" >nul 2>&1
+echo Dang ap dung ban dich TIENG ANH...
+taskkill /F /FI "IMAGENAME eq *yasi*" >nul 2>&1
+powershell -Command "Get-Process | Where-Object { .Path -like '*yasige*' } | Stop-Process -Force -ErrorAction SilentlyContinue"
 node patcher.js patch en
 echo.
-echo Hoàn tất! Vui lòng khởi động lại ứng dụng IELTS Bro.
+echo Hoan tat! Vui long khoi dong lai ung dung IELTS Bro.
 pause
 goto MENU
 
 :RESTORE
 cls
-echo Đang khôi phục lại ứng dụng gốc...
-taskkill /F /IM "雅思哥机考软件.exe" >nul 2>&1
+echo Dang khoi phuc lai ung dung goc...
+taskkill /F /FI "IMAGENAME eq *yasi*" >nul 2>&1
+powershell -Command "Get-Process | Where-Object { .Path -like '*yasige*' } | Stop-Process -Force -ErrorAction SilentlyContinue"
 node patcher.js restore
 echo.
-echo Đã khôi phục trạng thái gốc ban đầu!
+echo Da khoi phuc trang thai goc ban dau!
 pause
 goto MENU
 
