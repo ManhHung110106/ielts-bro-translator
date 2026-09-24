@@ -15,7 +15,7 @@ function getMimeType(filePath) {
   }
 }
 
-const HTML = `<!DOCTYPE html>
+const HTML = <!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
@@ -271,23 +271,23 @@ const HTML = `<!DOCTYPE html>
       </div>
     </div>
 
-    <div class="section-label">Chá»n ngÃ´n ngá»¯:</div>
+    <div class="section-label">Chọn ngôn ngữ:</div>
 
     <div class="lang-row">
       <button class="btn-lang" onclick="applyLang('vi')">
-        <span class="flag">ðŸ‡»ðŸ‡³</span>
-        <span>Tiáº¿ng Viá»‡t</span>
+        <span class="flag">🇻🇳</span>
+        <span>Tiếng Việt</span>
       </button>
 
       <button class="btn-lang" onclick="applyLang('en')">
-        <span class="flag">ðŸ‡¬ðŸ‡§</span>
-        <span>Tiáº¿ng Anh</span>
+        <span class="flag">🇬🇧</span>
+        <span>Tiếng Anh</span>
       </button>
     </div>
 
     <div class="restore-wrap">
       <button class="btn-restore" onclick="restoreOriginal()">
-        <span>KhÃ´i phá»¥c cÃ i Ä‘áº·t gá»‘c</span>
+        <span>Khôi phục cài đặt gốc</span>
       </button>
     </div>
 
@@ -296,7 +296,7 @@ const HTML = `<!DOCTYPE html>
         <svg class="github-icon" viewBox="0 0 16 16">
           <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
         </svg>
-        <span>TÃ¬m hiá»ƒu thÃªm vá» tÃ´i?</span>
+        <span>Tìm hiểu thêm về tôi?</span>
       </a>
     </div>
   </div>
@@ -320,7 +320,7 @@ const HTML = `<!DOCTYPE html>
     }
 
     async function applyLang(lang) {
-      showToast('Äang Ã¡p dá»¥ng báº£n dá»‹ch...', 'loading', 0);
+      showToast('Đang áp dụng bản dịch...', 'loading', 0);
       try {
         const res = await fetch('/api/patch', {
           method: 'POST',
@@ -329,33 +329,33 @@ const HTML = `<!DOCTYPE html>
         });
         const data = await res.json();
         if (data.success) {
-          showToast('ÄÃ£ Ã¡p dá»¥ng thÃ nh cÃ´ng! HÃ£y má»Ÿ IELTS Bro.', 'success', 3500);
+          showToast('Đã áp dụng thành công! Hãy mở IELTS Bro.', 'success', 3500);
         } else {
-          showToast('Lá»—i: ' + (data.error || 'Thao tÃ¡c khÃ´ng thÃ nh cÃ´ng'), 'error', 4500);
+          showToast('Lỗi: ' + (data.error || 'Thao tác không thành công'), 'error', 4500);
         }
       } catch (err) {
-        showToast('Lá»—i káº¿t ná»‘i: ' + err.message, 'error', 4500);
+        showToast('Lỗi kết nối: ' + err.message, 'error', 4500);
       }
     }
 
     async function restoreOriginal() {
-      showToast('Äang khÃ´i phá»¥c báº£n gá»‘c...', 'loading', 0);
+      showToast('Đang khôi phục bản gốc...', 'loading', 0);
       try {
         const res = await fetch('/api/restore', { method: 'POST' });
         const data = await res.json();
         if (data.success) {
-          showToast('ÄÃ£ khÃ´i phá»¥c cÃ i Ä‘áº·t gá»‘c thÃ nh cÃ´ng!', 'success', 3500);
+          showToast('Đã khôi phục cài đặt gốc thành công!', 'success', 3500);
         } else {
-          showToast('Lá»—i: ' + (data.error || 'Tháº¥t báº¡i'), 'error', 4500);
+          showToast('Lỗi: ' + (data.error || 'Thất bại'), 'error', 4500);
         }
       } catch (err) {
-        showToast('Lá»—i: ' + err.message, 'error', 4500);
+        showToast('Lỗi: ' + err.message, 'error', 4500);
       }
     }
   </script>
 </body>
 </html>
-`;
+;
 
 const server = http.createServer(async (req, res) => {
   if (req.method === 'GET' && req.url === '/logo.png') {
@@ -413,5 +413,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, '127.0.0.1', () => {
-  console.log(`[GUI Server] Running at http://127.0.0.1:${PORT}`);
+  console.log([GUI Server] Running at http://127.0.0.1:);
 });
