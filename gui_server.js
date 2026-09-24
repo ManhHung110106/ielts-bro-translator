@@ -20,7 +20,7 @@ const HTML = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IELTS Bro UI Translator</title>
+  <title>IELTS Bro Translator</title>
   <link rel="icon" type="image/png" href="/logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -267,7 +267,7 @@ const HTML = `<!DOCTYPE html>
     <div class="brand-header">
       <img src="/logo.png" alt="Logo" class="app-logo">
       <div class="header-text">
-        <h1>IELTS Bro UI Translator</h1>
+        <h1>IELTS Bro Translator</h1>
       </div>
     </div>
 

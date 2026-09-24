@@ -1,5 +1,5 @@
 @echo off
-title IELTS Bro UI Translator
+title IELTS Bro Translator
 cd /d "%~dp0"
 
 :: Check administrator privileges

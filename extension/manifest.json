@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "IELTS Bro Web Translator",
+  "name": "IELTS Bro Translator",
   "version": "1.0.0",
   "description": "Dịch giao diện trang web luyện thi IELTS Bro (雅思哥) sang Tiếng Việt và Tiếng Anh.",
   "icons": {
@@ -10,7 +10,7 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "IELTS Bro Web Translator",
+    "default_title": "IELTS Bro Translator",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png"
