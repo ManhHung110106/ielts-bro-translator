@@ -80,9 +80,9 @@ Nhằm hỗ trợ cộng đồng người Việt tự học và ôn luyện IELT
 
 ---
 
-## 💖 Lời Cảm Ơn & Ủng Hộ (Sponsor)
+## 💖 Lời Cảm Ơn & Ủng Hộ
 
-Chúc các bạn có một quá trình ôn luyện thật hiệu quả và đạt được band điểm IELTS mơ ước (7.5+, 8.0+ Target)!
+Chúc các bạn có một quá trình ôn luyện thật hiệu quả và đạt được band điểm IELTS mơ ước (6.5+, 8.0+ Target)!
 
 Nếu bạn thấy công cụ này hữu ích và tiết kiệm thời gian cho bạn:
 - Hãy dành tặng dự án **1 sao (⭐ Star)** ở góc phải trên cùng của repository này nhé!
