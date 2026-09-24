@@ -1,9 +1,71 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { patch, restore, getStatus, launchApp } = require('./patcher');
+const { spawn } = require('child_process');
+const {
+  patch,
+  restore,
+  getStatus,
+  launchApp,
+  resolveAsarPath,
+  DEFAULT_APP_PATH
+} = require('./patcher');
 
 const PORT = 38292;
+const CONFIG_FILE = path.join(__dirname, 'config.json');
+
+function loadConfig() {
+  try {
+    if (fs.existsSync(CONFIG_FILE)) {
+      const data = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+      if (data && data.appPath) return data;
+    }
+  } catch (e) {}
+  return { appPath: 'C:\\Program Files\\yasige' };
+}
+
+function saveConfig(cfg) {
+  try {
+    fs.writeFileSync(CONFIG_FILE, JSON.stringify(cfg, null, 2), 'utf8');
+  } catch (e) {}
+}
+
+function openWindowsDialog(type = 'file') {
+  return new Promise((resolve) => {
+    let script = '';
+    if (type === 'folder') {
+      script = `
+        Add-Type -AssemblyName System.Windows.Forms
+        $fbd = New-Object System.Windows.Forms.FolderBrowserDialog
+        $fbd.Description = "Chọn thư mục cài đặt IELTS Bro (yasige)"
+        $fbd.ShowNewFolderButton = $false
+        if ($fbd.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          Write-Output $fbd.SelectedPath
+        }
+      `;
+    } else {
+      script = `
+        Add-Type -AssemblyName System.Windows.Forms
+        $ofd = New-Object System.Windows.Forms.OpenFileDialog
+        $ofd.Title = "Chọn tệp app.asar hoặc yasige.exe"
+        $ofd.Filter = "IELTS Bro Files (*.asar;*.exe)|*.asar;*.exe|All Files (*.*)|*.*"
+        $ofd.InitialDirectory = "C:\\Program Files\\yasige"
+        if ($ofd.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          Write-Output $ofd.FileName
+        }
+      `;
+    }
+    const child = spawn('powershell', ['-NoProfile', '-STA', '-Command', script]);
+    let stdout = '';
+    child.stdout.on('data', d => stdout += d.toString());
+    child.on('close', () => {
+      resolve(stdout.trim());
+    });
+    child.on('error', () => resolve(''));
+  });
+}
 
 function getMimeType(filePath) {
   const ext = path.extname(filePath).toLowerCase();
@@ -37,9 +99,14 @@ const HTML = `<!DOCTYPE html>
       --text-main: #0f172a;
       --text-muted: #64748b;
       --surface: #f8fafc;
+      --surface-border: #e2e8f0;
       --danger: #dc2626;
       --danger-hover: #b91c1c;
       --danger-bg: #fef2f2;
+      --success: #16a34a;
+      --success-bg: #f0fdf4;
+      --warning: #d97706;
+      --warning-bg: #fffbeb;
     }
 
     * {
@@ -64,11 +131,11 @@ const HTML = `<!DOCTYPE html>
 
     .app-card {
       width: 100%;
-      max-width: 480px;
+      max-width: 500px;
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 16px;
-      padding: 32px;
+      padding: 28px;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -2px rgba(0, 0, 0, 0.02);
     }
 
@@ -76,7 +143,7 @@ const HTML = `<!DOCTYPE html>
       display: flex;
       align-items: center;
       gap: 14px;
-      margin-bottom: 24px;
+      margin-bottom: 22px;
     }
 
     .app-logo {
@@ -96,7 +163,117 @@ const HTML = `<!DOCTYPE html>
       letter-spacing: -0.3px;
     }
 
+    /* Path Configuration Section */
+    .path-section {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 22px;
+    }
+
     .section-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .path-input-wrap {
+      margin-bottom: 10px;
+    }
+
+    .path-input {
+      width: 100%;
+      padding: 8px 12px;
+      background: #ffffff;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 12.5px;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      user-select: text;
+    }
+
+    .path-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
+    }
+
+    .path-btn-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .btn-action-small {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 10px;
+      background: #ffffff;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      outline: none;
+    }
+
+    .btn-action-small:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-subtle);
+    }
+
+    .btn-action-small:active {
+      transform: scale(0.98);
+    }
+
+    .path-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .status-dot.ok {
+      background: var(--success);
+      box-shadow: 0 0 6px rgba(22, 163, 74, 0.4);
+    }
+
+    .status-dot.warn {
+      background: var(--warning);
+      box-shadow: 0 0 6px rgba(217, 119, 6, 0.4);
+    }
+
+    .status-text.ok {
+      color: var(--success);
+    }
+
+    .status-text.warn {
+      color: var(--warning);
+    }
+
+    /* Action Buttons */
+    .action-label {
       font-size: 13.5px;
       font-weight: 600;
       color: var(--text-muted);
@@ -107,7 +284,7 @@ const HTML = `<!DOCTYPE html>
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     .btn-lang {
@@ -115,13 +292,13 @@ const HTML = `<!DOCTYPE html>
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 14px 16px;
+      padding: 13px 16px;
       background: #ffffff;
       border: 1.5px solid var(--accent);
       border-radius: 10px;
       color: var(--accent);
       font-family: inherit;
-      font-size: 14.5px;
+      font-size: 14px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.15s ease;
@@ -146,7 +323,7 @@ const HTML = `<!DOCTYPE html>
     .restore-wrap {
       display: flex;
       justify-content: center;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
     }
 
     .btn-restore {
@@ -177,7 +354,7 @@ const HTML = `<!DOCTYPE html>
 
     .footer-divider {
       border-top: 1px solid var(--card-border);
-      padding-top: 20px;
+      padding-top: 18px;
       display: flex;
       justify-content: center;
     }
@@ -220,6 +397,8 @@ const HTML = `<!DOCTYPE html>
       align-items: center;
       gap: 8px;
       z-index: 1000;
+      max-width: 90%;
+      text-align: center;
     }
 
     .toast.show {
@@ -271,7 +450,26 @@ const HTML = `<!DOCTYPE html>
       </div>
     </div>
 
-    <div class="section-label">Chọn ngôn ngữ:</div>
+    <!-- Path Selector Section -->
+    <div class="path-section">
+      <div class="section-label">
+        <span>Đường dẫn cài đặt IELTS Bro (yasige):</span>
+      </div>
+      <div class="path-input-wrap">
+        <input type="text" id="pathInput" class="path-input" placeholder="C:\\Program Files\\yasige" spellcheck="false">
+      </div>
+      <div class="path-btn-row">
+        <button type="button" class="btn-action-small" id="btnBrowseFolder" title="Duyệt thư mục yasige">📁 Chọn thư mục</button>
+        <button type="button" class="btn-action-small" id="btnBrowseFile" title="Chọn tệp app.asar hoặc yasige.exe">📂 Chọn tệp</button>
+        <button type="button" class="btn-action-small" id="btnDefaultPath" title="Khôi phục đường dẫn mặc định">↺ Mặc định</button>
+      </div>
+      <div class="path-status">
+        <span id="statusDot" class="status-dot ok"></span>
+        <span id="statusText" class="status-text ok">Đang kiểm tra đường dẫn...</span>
+      </div>
+    </div>
+
+    <div class="action-label">Chọn ngôn ngữ:</div>
 
     <div class="lang-row">
       <button class="btn-lang" onclick="applyLang('vi')">
@@ -303,6 +501,14 @@ const HTML = `<!DOCTYPE html>
 
   <script>
     const toast = document.getElementById('toast');
+    const pathInput = document.getElementById('pathInput');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    const btnBrowseFolder = document.getElementById('btnBrowseFolder');
+    const btnBrowseFile = document.getElementById('btnBrowseFile');
+    const btnDefaultPath = document.getElementById('btnDefaultPath');
+
+    let defaultPathVal = 'C:\\\\Program Files\\\\yasige';
 
     function showToast(msg, type = 'success', duration = 3000) {
       toast.className = 'toast ' + type + ' show';
@@ -319,37 +525,128 @@ const HTML = `<!DOCTYPE html>
       }
     }
 
+    async function checkPathStatus(customPath) {
+      try {
+        const p = customPath || pathInput.value.trim();
+        const res = await fetch('/api/status?path=' + encodeURIComponent(p));
+        const data = await res.json();
+        if (data.appInstalled) {
+          statusDot.className = 'status-dot ok';
+          statusText.className = 'status-text ok';
+          statusText.innerText = '✓ Đã tìm thấy tệp cài đặt IELTS Bro (app.asar)';
+        } else {
+          statusDot.className = 'status-dot warn';
+          statusText.className = 'status-text warn';
+          statusText.innerText = '⚠ Không tìm thấy app.asar tại đường dẫn này';
+        }
+        // Save path to server config
+        fetch('/api/save-path', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: p })
+        }).catch(() => {});
+      } catch (err) {
+        statusDot.className = 'status-dot warn';
+        statusText.className = 'status-text warn';
+        statusText.innerText = 'Không thể kiểm tra đường dẫn';
+      }
+    }
+
+    let debounceTimer = null;
+    pathInput.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        checkPathStatus(pathInput.value.trim());
+      }, 350);
+    });
+
+    btnBrowseFolder.addEventListener('click', async () => {
+      showToast('Đang mở hộp thoại chọn thư mục...', 'loading', 2000);
+      try {
+        const res = await fetch('/api/browse-folder');
+        const data = await res.json();
+        if (data && data.path) {
+          pathInput.value = data.path;
+          checkPathStatus(data.path);
+          showToast('Đã chọn thư mục!', 'success', 2000);
+        }
+      } catch (err) {
+        showToast('Lỗi chọn thư mục: ' + err.message, 'error', 3000);
+      }
+    });
+
+    btnBrowseFile.addEventListener('click', async () => {
+      showToast('Đang mở hộp thoại chọn tệp...', 'loading', 2000);
+      try {
+        const res = await fetch('/api/browse-file');
+        const data = await res.json();
+        if (data && data.path) {
+          pathInput.value = data.path;
+          checkPathStatus(data.path);
+          showToast('Đã chọn tệp!', 'success', 2000);
+        }
+      } catch (err) {
+        showToast('Lỗi chọn tệp: ' + err.message, 'error', 3000);
+      }
+    });
+
+    btnDefaultPath.addEventListener('click', () => {
+      pathInput.value = defaultPathVal;
+      checkPathStatus(defaultPathVal);
+      showToast('Đã đặt lại đường dẫn mặc định', 'success', 2000);
+    });
+
+    // Init config on load
+    fetch('/api/config')
+      .then(res => res.json())
+      .then(cfg => {
+        if (cfg.appPath) pathInput.value = cfg.appPath;
+        if (cfg.defaultPath) defaultPathVal = 'C:\\\\Program Files\\\\yasige';
+        checkPathStatus(pathInput.value);
+      })
+      .catch(() => {
+        checkPathStatus();
+      });
+
     async function applyLang(lang) {
       showToast('Đang áp dụng bản dịch...', 'loading', 0);
+      const appPath = pathInput.value.trim();
       try {
         const res = await fetch('/api/patch', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ lang })
+          body: JSON.stringify({ lang, appPath })
         });
         const data = await res.json();
         if (data.success) {
           showToast('Đã áp dụng thành công! Đang tự động mở IELTS Bro...', 'success', 3500);
+          checkPathStatus(appPath);
         } else {
-          showToast('Lỗi: ' + (data.error || 'Thao tác không thành công'), 'error', 4500);
+          showToast('Lỗi: ' + (data.error || 'Thao tác không thành công'), 'error', 5000);
         }
       } catch (err) {
-        showToast('Lỗi kết nối: ' + err.message, 'error', 4500);
+        showToast('Lỗi kết nối: ' + err.message, 'error', 5000);
       }
     }
 
     async function restoreOriginal() {
       showToast('Đang khôi phục bản gốc...', 'loading', 0);
+      const appPath = pathInput.value.trim();
       try {
-        const res = await fetch('/api/restore', { method: 'POST' });
+        const res = await fetch('/api/restore', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ appPath })
+        });
         const data = await res.json();
         if (data.success) {
           showToast('Đã khôi phục cài đặt gốc! Đang tự động mở IELTS Bro...', 'success', 3500);
+          checkPathStatus(appPath);
         } else {
-          showToast('Lỗi: ' + (data.error || 'Thất bại'), 'error', 4500);
+          showToast('Lỗi: ' + (data.error || 'Thất bại'), 'error', 5000);
         }
       } catch (err) {
-        showToast('Lỗi: ' + err.message, 'error', 4500);
+        showToast('Lỗi: ' + err.message, 'error', 5000);
       }
     }
   </script>
@@ -358,7 +655,10 @@ const HTML = `<!DOCTYPE html>
 `;
 
 const server = http.createServer(async (req, res) => {
-  if (req.method === 'GET' && req.url === '/logo.png') {
+  const parsedUrl = new URL(req.url, `http://127.0.0.1:${PORT}`);
+  const pathname = parsedUrl.pathname;
+
+  if (req.method === 'GET' && pathname === '/logo.png') {
     const filePath = path.join(__dirname, 'logo.png');
     if (fs.existsSync(filePath)) {
       res.writeHead(200, { 'Content-Type': getMimeType(filePath) });
@@ -367,27 +667,91 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
-  if (req.method === 'GET' && req.url === '/') {
+  if (req.method === 'GET' && pathname === '/') {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(HTML);
     return;
   }
 
-  if (req.method === 'GET' && req.url === '/api/status') {
+  if (req.method === 'GET' && pathname === '/api/config') {
+    const cfg = loadConfig();
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(getStatus()));
+    res.end(JSON.stringify({ ...cfg, defaultPath: DEFAULT_APP_PATH }));
     return;
   }
 
-  if (req.method === 'POST' && req.url === '/api/patch') {
+  if (req.method === 'GET' && pathname === '/api/status') {
+    const targetPath = parsedUrl.searchParams.get('path');
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(getStatus(targetPath || loadConfig().appPath)));
+    return;
+  }
+
+  if (req.method === 'POST' && pathname === '/api/save-path') {
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', () => {
+      try {
+        const { path: newPath } = JSON.parse(body || '{}');
+        if (newPath) {
+          const cfg = loadConfig();
+          cfg.appPath = newPath;
+          saveConfig(cfg);
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true }));
+      } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: err.message }));
+      }
+    });
+    return;
+  }
+
+  if (req.method === 'GET' && pathname === '/api/browse-folder') {
+    try {
+      const chosenPath = await openWindowsDialog('folder');
+      if (chosenPath) {
+        const cfg = loadConfig();
+        cfg.appPath = chosenPath;
+        saveConfig(cfg);
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ path: chosenPath }));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+
+  if (req.method === 'GET' && pathname === '/api/browse-file') {
+    try {
+      const chosenPath = await openWindowsDialog('file');
+      if (chosenPath) {
+        const cfg = loadConfig();
+        cfg.appPath = chosenPath;
+        saveConfig(cfg);
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ path: chosenPath }));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+
+  if (req.method === 'POST' && pathname === '/api/patch') {
     let body = '';
     req.on('data', chunk => body += chunk);
     req.on('end', async () => {
       try {
-        const { lang } = JSON.parse(body || '{}');
-        await patch(undefined, lang || 'vi');
+        const { lang, appPath } = JSON.parse(body || '{}');
+        const targetPath = appPath || loadConfig().appPath;
+        await patch(targetPath, lang || 'vi');
         setTimeout(() => {
-          launchApp();
+          launchApp(targetPath);
         }, 600);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true }));
@@ -399,18 +763,24 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  if (req.method === 'POST' && req.url === '/api/restore') {
-    try {
-      await restore();
-      setTimeout(() => {
-        launchApp();
-      }, 600);
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: true }));
-    } catch (err) {
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: false, error: err.message }));
-    }
+  if (req.method === 'POST' && pathname === '/api/restore') {
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', async () => {
+      try {
+        const { appPath } = JSON.parse(body || '{}');
+        const targetPath = appPath || loadConfig().appPath;
+        await restore(targetPath);
+        setTimeout(() => {
+          launchApp(targetPath);
+        }, 600);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true }));
+      } catch (err) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: err.message }));
+      }
+    });
     return;
   }
 

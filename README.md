@@ -59,6 +59,7 @@ Nhằm hỗ trợ cộng đồng người Việt tự học và ôn luyện IELT
 1. Tải dự án này về máy ([Tải bản Release v1.0.0 (ZIP)](https://github.com/ManhHung110106/ielts-bro-translator/releases/latest) hoặc `git clone`).
 2. Mở thư mục và click đúp vào file **`run_translator.bat`**.
 3. Cửa sổ ứng dụng sẽ mở lên:
+   - Nếu bạn cài đặt IELTS Bro ở thư mục hoặc ổ đĩa khác (không phải `C:\Program Files\yasige`), chỉ cần nhấn **📁 Chọn thư mục** hoặc **📂 Chọn tệp** để chọn nơi cài đặt của bạn.
    - Nhấn **🇻🇳 Tiếng Việt** hoặc **🇬🇧 Tiếng Anh**.
    - Ứng dụng IELTS Bro sẽ **tự động được mở lên** với giao diện mới!
    - *(Khi cần quay về tiếng Trung, chỉ cần nhấn **Khôi phục cài đặt gốc**).*
@@ -68,15 +69,15 @@ Nhằm hỗ trợ cộng đồng người Việt tự học và ôn luyện IELT
 #### 🌐 Cách 2: Dịch Trực Tiếp Trên Nền Tảng Web (Chrome Extension)
 *Dành cho bạn nào làm bài thi trực tiếp trên trình duyệt tại [pc-new.ieltsbro.com](https://pc-new.ieltsbro.com/).*
 
-1. Tải bộ cài từ mục [Releases](https://github.com/ManhHung110106/ielts-bro-translator/releases/latest) (hoặc tải toàn bộ mã nguồn về máy).
+1. Tải file `IELTS-Bro-Translator-Chrome-Extension-v1.0.0.zip` từ mục [Releases](https://github.com/ManhHung110106/ielts-bro-translator/releases/latest) rồi giải nén ra (hoặc dùng thư mục `extension` trong mã nguồn).
 2. Mở trình duyệt Chrome (hoặc Edge, Cốc Cốc, Brave).
 3. Truy cập vào đường dẫn quản lý tiện ích:
    - Trên Chrome: `chrome://extensions`
    - Trên Edge: `edge://extensions`
 4. Bật công tắc **Chế độ dành cho nhà phát triển (Developer mode)** ở góc trên bên phải.
-5. Nhấn nút **Tải tiện ích đã giải nén (Load unpacked)** -> Chọn thư mục **`extension`** nằm bên trong thư mục dự án này.
+5. Nhấn nút **Tải tiện ích đã giải nén (Load unpacked)** -> Chọn thư mục **`ielts-bro-extension`** (hoặc `extension`).
 6. Truy cập vào trang web [https://pc-new.ieltsbro.com/](https://pc-new.ieltsbro.com/):
-   - Nhấp vào icon tiện ích **IELTS Bro Web** trên thanh công cụ trình duyệt để đổi ngôn ngữ hoặc bật/tắt dịch theo ý muốn!
+   - Nhấp vào icon tiện ích **IELTS Bro Translator** trên thanh công cụ trình duyệt để đổi qua lại mượt mà giữa Tiếng Việt, Tiếng Anh hoặc Khôi phục cài đặt gốc!
 
 ---
 

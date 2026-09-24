@@ -5,6 +5,40 @@ const { exec, spawn } = require('child_process');
 
 const DEFAULT_APP_PATH = 'C:\\Program Files\\yasige\\resources\\app.asar';
 
+function resolveAsarPath(inputPath) {
+  if (!inputPath || typeof inputPath !== 'string' || !inputPath.trim()) {
+    return DEFAULT_APP_PATH;
+  }
+  let p = inputPath.trim().replace(/^["']|["']$/g, '');
+  if (fs.existsSync(p)) {
+    const stat = fs.statSync(p);
+    if (stat.isDirectory()) {
+      const inRes = path.join(p, 'resources', 'app.asar');
+      if (fs.existsSync(inRes)) return inRes;
+      const inDir = path.join(p, 'app.asar');
+      if (fs.existsSync(inDir)) return inDir;
+      return inRes;
+    } else {
+      if (p.toLowerCase().endsWith('.asar')) {
+        return p;
+      }
+      if (p.toLowerCase().endsWith('.exe')) {
+        const inRes = path.join(path.dirname(p), 'resources', 'app.asar');
+        return inRes;
+      }
+      return p;
+    }
+  } else {
+    if (p.toLowerCase().endsWith('app.asar')) {
+      return p;
+    }
+    if (p.toLowerCase().endsWith('.exe')) {
+      return path.join(path.dirname(p), 'resources', 'app.asar');
+    }
+    return path.join(p, 'resources', 'app.asar');
+  }
+}
+
 function killApp() {
   return new Promise((resolve) => {
     // Kill IELTS Bro and any lingering updater or node processes running in yasige
@@ -15,13 +49,23 @@ function killApp() {
   });
 }
 
-function launchApp() {
+function launchApp(targetPath = DEFAULT_APP_PATH) {
   try {
-    const installDir = 'C:\\Program Files\\yasige';
-    if (!fs.existsSync(installDir)) return false;
+    const resolvedAsar = resolveAsarPath(targetPath);
+    let installDir = path.dirname(resolvedAsar);
+    if (path.basename(installDir).toLowerCase() === 'resources') {
+      installDir = path.dirname(installDir);
+    }
+    if (!fs.existsSync(installDir)) {
+      console.warn('[Patcher] Install directory does not exist:', installDir);
+      return false;
+    }
     const files = fs.readdirSync(installDir);
     const exe = files.find(f => f.endsWith('.exe') && !f.toLowerCase().includes('uninstall'));
-    if (!exe) return false;
+    if (!exe) {
+      console.warn('[Patcher] No executable found in:', installDir);
+      return false;
+    }
     const exePath = path.join(installDir, exe);
     const child = spawn(exePath, [], {
       cwd: installDir,
@@ -29,7 +73,7 @@ function launchApp() {
       stdio: 'ignore'
     });
     child.unref();
-    console.log('[Patcher] IELTS Bro launched automatically.');
+    console.log('[Patcher] IELTS Bro launched automatically from ' + exePath);
     return true;
   } catch (err) {
     console.error('[Patcher] Failed to launch IELTS Bro:', err.message);
@@ -38,6 +82,7 @@ function launchApp() {
 }
 
 async function patch(asarPath = DEFAULT_APP_PATH, lang = 'vi') {
+  asarPath = resolveAsarPath(asarPath);
   console.log(`[Patcher] Closing running IELTS Bro instances...`);
   await killApp();
 
@@ -114,6 +159,7 @@ try {
 }
 
 async function restore(asarPath = DEFAULT_APP_PATH) {
+  asarPath = resolveAsarPath(asarPath);
   console.log(`[Restore] Closing running IELTS Bro instances...`);
   await killApp();
 
@@ -128,16 +174,24 @@ async function restore(asarPath = DEFAULT_APP_PATH) {
 }
 
 function getStatus(asarPath = DEFAULT_APP_PATH) {
-  const exists = fs.existsSync(asarPath);
-  const hasBackup = fs.existsSync(asarPath + '.bak');
+  const resolved = resolveAsarPath(asarPath);
+  const exists = fs.existsSync(resolved);
+  const hasBackup = fs.existsSync(resolved + '.bak');
+  let installDir = path.dirname(resolved);
+  if (path.basename(installDir).toLowerCase() === 'resources') {
+    installDir = path.dirname(installDir);
+  }
   return {
     appInstalled: exists,
     hasBackup: hasBackup,
-    appPath: asarPath
+    appPath: resolved,
+    installDir: installDir
   };
 }
 
 module.exports = {
+  DEFAULT_APP_PATH,
+  resolveAsarPath,
   patch,
   restore,
   getStatus,
@@ -148,13 +202,14 @@ module.exports = {
 if (require.main === module) {
   const action = process.argv[2] || 'patch';
   const lang = process.argv[3] || 'vi';
+  const customPath = process.argv[4];
   if (action === 'restore') {
-    restore().catch(err => {
+    restore(customPath).catch(err => {
       console.error(err);
       process.exit(1);
     });
   } else {
-    patch(DEFAULT_APP_PATH, lang).catch(err => {
+    patch(customPath || DEFAULT_APP_PATH, lang).catch(err => {
       console.error(err);
       process.exit(1);
     });

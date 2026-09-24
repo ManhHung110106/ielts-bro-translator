@@ -13,11 +13,34 @@
     }
 
     body {
-      width: 280px;
+      width: 290px;
       font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
       background: #ffffff;
       color: #0f172a;
       padding: 18px;
+    }
+
+    .top-cta {
+      text-align: center;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .top-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #ea580c;
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+
+    .top-link:hover {
+      color: #c2410c;
+      text-decoration: underline;
     }
 
     .header {
@@ -25,8 +48,6 @@
       align-items: center;
       gap: 10px;
       margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #e2e8f0;
     }
 
     .logo {
@@ -34,6 +55,7 @@
       height: 32px;
       border-radius: 8px;
       border: 1px solid #e2e8f0;
+      padding: 2px;
     }
 
     .title {
@@ -52,7 +74,7 @@
     .btn-group {
       display: flex;
       gap: 8px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .btn-lang {
@@ -78,9 +100,17 @@
       color: #ffffff;
     }
 
+    .restore-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
     .btn-restore {
-      width: 100%;
-      padding: 8px 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
       background: #ffffff;
       border: 1px solid #fecaca;
       border-radius: 6px;
@@ -90,7 +120,6 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.15s ease;
-      margin-bottom: 16px;
     }
 
     .btn-restore:hover {
@@ -112,20 +141,33 @@
       color: #64748b;
       text-decoration: none;
       font-weight: 500;
+      transition: color 0.15s ease;
     }
 
     .github-link:hover {
       color: #ea580c;
     }
+
+    .github-icon {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
   </style>
 </head>
 <body>
+  <div class="top-cta">
+    <a href="https://pc-new.ieltsbro.com/" target="_blank" class="top-link">
+      <span>Luyện thi IELTS</span>
+    </a>
+  </div>
+
   <div class="header">
     <img src="icons/icon48.png" alt="Logo" class="logo">
     <div class="title">IELTS Bro Translator</div>
   </div>
 
-  <div class="section-title">Chọn ngôn ngữ dịch:</div>
+  <div class="section-title">Chọn ngôn ngữ:</div>
 
   <div class="btn-group">
     <button class="btn-lang" id="btn-vi">
@@ -138,11 +180,16 @@
     </button>
   </div>
 
-  <button class="btn-restore" id="btn-restore">↺ Khôi phục gốc (Tắt dịch)</button>
+  <div class="restore-wrap">
+    <button class="btn-restore" id="btn-restore">Khôi phục cài đặt gốc</button>
+  </div>
 
   <div class="footer">
     <a href="https://github.com/ManhHung110106/ielts-bro-translator" target="_blank" class="github-link">
-      <span>⭐ Ủng hộ trên GitHub</span>
+      <svg class="github-icon" viewBox="0 0 16 16">
+        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+      </svg>
+      <span>Tìm hiểu thêm về tôi?</span>
     </a>
   </div>
 

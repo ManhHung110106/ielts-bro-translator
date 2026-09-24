@@ -303,10 +303,12 @@
 }
   };
 
-  let currentLang = 'vi'; // default
+  let currentLang = 'vi';
   let isEnabled = true;
 
-  // LocalStorage Cache
+  // Track original text per node so we can switch between VI <-> EN cleanly!
+  const originalTextMap = new WeakMap();
+
   function getCacheKey() {
     return '__IELTS_BRO_WEB_CACHE_' + currentLang + '__';
   }
@@ -350,7 +352,7 @@
           }
         });
         saveCache();
-        if (document.body) translateNode(document.body);
+        if (document.body && isEnabled) translateNode(document.body);
       }
     } catch (err) {
       console.warn('[IELTS-Bro-Web-Translator] Translation error:', err.message);
@@ -413,6 +415,13 @@
     }
 
     // Crucial rule: Never translate IELTS Exam Questions / Passages
+    if (parent.closest) {
+      const examContainer = parent.closest(
+        '.passage-content, .article-content, .reading-article, .question-text, .test-content, .cambridge-content, .exam-wrap, .exam-section'
+      );
+      if (examContainer) return true;
+    }
+
     const className = (parent.className && typeof parent.className === 'string') ? parent.className : '';
     if (
       className.includes('passage-content') ||
@@ -431,23 +440,58 @@
 
     if (node.nodeType === Node.TEXT_NODE) {
       if (shouldSkipNode(node)) return;
-      const original = node.nodeValue;
-      if (original && CHINESE_REGEX.test(original)) {
-        const translated = translateText(original);
-        if (translated !== original) {
+
+      // Check if original Chinese text was stored
+      let orig = originalTextMap.get(node);
+      if (!orig) {
+        orig = node.nodeValue;
+        if (orig && CHINESE_REGEX.test(orig)) {
+          originalTextMap.set(node, orig);
+        }
+      }
+
+      if (orig && CHINESE_REGEX.test(orig)) {
+        const translated = translateText(orig);
+        if (translated && translated !== node.nodeValue) {
           node.nodeValue = translated;
         }
       }
     } else if (node.nodeType === Node.ELEMENT_NODE) {
       for (const attr of ['placeholder', 'title', 'aria-label']) {
-        const val = node.getAttribute(attr);
-        if (val && CHINESE_REGEX.test(val)) {
-          node.setAttribute(attr, translateText(val));
+        const key = '__orig_' + attr;
+        let orig = node.dataset[key];
+        const currentVal = node.getAttribute(attr);
+        if (!orig && currentVal && CHINESE_REGEX.test(currentVal)) {
+          node.dataset[key] = currentVal;
+          orig = currentVal;
+        }
+        if (orig && CHINESE_REGEX.test(orig)) {
+          node.setAttribute(attr, translateText(orig));
         }
       }
 
       for (let child = node.firstChild; child; child = child.nextSibling) {
         translateNode(child);
+      }
+    }
+  }
+
+  function restoreOriginalNodes(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const orig = originalTextMap.get(node);
+      if (orig) {
+        node.nodeValue = orig;
+      }
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      for (const attr of ['placeholder', 'title', 'aria-label']) {
+        const key = '__orig_' + attr;
+        const orig = node.dataset[key];
+        if (orig) {
+          node.setAttribute(attr, orig);
+        }
+      }
+      for (let child = node.firstChild; child; child = child.nextSibling) {
+        restoreOriginalNodes(child);
       }
     }
   }
@@ -458,10 +502,14 @@
       if (mutation.type === 'characterData') {
         const target = mutation.target;
         if (!shouldSkipNode(target)) {
-          const original = target.nodeValue;
-          if (original && CHINESE_REGEX.test(original)) {
-            const translated = translateText(original);
-            if (translated !== original) {
+          let orig = originalTextMap.get(target);
+          if (!orig && target.nodeValue && CHINESE_REGEX.test(target.nodeValue)) {
+            originalTextMap.set(target, target.nodeValue);
+            orig = target.nodeValue;
+          }
+          if (orig && CHINESE_REGEX.test(orig)) {
+            const translated = translateText(orig);
+            if (translated && translated !== target.nodeValue) {
               target.nodeValue = translated;
             }
           }
@@ -492,7 +540,6 @@
     init();
   }
 
-  // Read config from chrome storage
   if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
     chrome.storage.sync.get(['targetLang', 'enabled'], (data) => {
       if (data.targetLang) currentLang = data.targetLang;
@@ -501,20 +548,22 @@
       if (document.body && isEnabled) translateNode(document.body);
     });
 
-    // Listen to messages from popup
     chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       if (msg.action === 'changeLang') {
         currentLang = msg.lang;
         isEnabled = true;
         translationMemory.clear();
         loadCache();
-        if (document.body) translateNode(document.body);
+        if (document.body) {
+          translateNode(document.body);
+        }
         sendResponse({ success: true });
       } else if (msg.action === 'toggleEnable') {
         isEnabled = msg.enabled;
         if (!isEnabled) {
-          location.reload();
+          if (document.body) restoreOriginalNodes(document.body);
         } else {
+          loadCache();
           if (document.body) translateNode(document.body);
         }
         sendResponse({ success: true });
@@ -522,5 +571,5 @@
     });
   }
 
-  console.log('[IELTS-Bro-Web-Translator] Extension content script active.');
+  console.log('[IELTS-Bro-Web-Translator] Extension content script active with 2-way switcher.');
 })();

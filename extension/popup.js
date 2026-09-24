@@ -39,4 +39,14 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   });
+
+  document.querySelectorAll('a[href]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      const url = link.getAttribute('href');
+      if (url && url.startsWith('http')) {
+        e.preventDefault();
+        chrome.tabs.create({ url });
+      }
+    });
+  });
 });
