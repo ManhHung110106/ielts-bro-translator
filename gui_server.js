@@ -9,8 +9,6 @@ function getMimeType(filePath) {
   const ext = path.extname(filePath).toLowerCase();
   switch (ext) {
     case '.png': return 'image/png';
-    case '.jpg':
-    case '.jpeg': return 'image/jpeg';
     case '.ico': return 'image/x-icon';
     case '.svg': return 'image/svg+xml';
     default: return 'application/octet-stream';
@@ -39,9 +37,8 @@ const HTML = `<!DOCTYPE html>
       --text-main: #0f172a;
       --text-muted: #64748b;
       --surface: #f8fafc;
-      --success: #15803d;
-      --success-bg: #f0fdf4;
-      --danger: #b91c1c;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
       --danger-bg: #fef2f2;
     }
 
@@ -67,10 +64,10 @@ const HTML = `<!DOCTYPE html>
 
     .app-card {
       width: 100%;
-      max-width: 520px;
+      max-width: 480px;
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 32px;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -2px rgba(0, 0, 0, 0.02);
     }
@@ -78,159 +75,132 @@ const HTML = `<!DOCTYPE html>
     .brand-header {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
       margin-bottom: 24px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid var(--card-border);
     }
 
     .app-logo {
-      width: 52px;
-      height: 52px;
+      width: 44px;
+      height: 44px;
       object-fit: contain;
       border-radius: 10px;
       border: 1px solid var(--card-border);
-      padding: 3px;
+      padding: 2px;
       background: #ffffff;
     }
 
     .header-text h1 {
-      font-size: 19px;
+      font-size: 20px;
       font-weight: 700;
       color: var(--text-main);
       letter-spacing: -0.3px;
     }
 
-    .header-text p {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-top: 3px;
-    }
-
-    .info-callout {
-      background: var(--surface);
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 24px;
-      font-size: 13px;
-    }
-
-    .info-callout .path {
-      color: var(--text-muted);
-      font-size: 12px;
-      font-family: monospace;
-      margin-top: 2px;
-    }
-
-    .status-tag {
-      font-size: 12px;
+    .section-label {
+      font-size: 13.5px;
       font-weight: 600;
-      color: var(--accent);
-      background: var(--accent-subtle);
-      padding: 4px 10px;
-      border-radius: 6px;
-      border: 1px solid var(--accent-border);
+      color: var(--text-muted);
+      margin-bottom: 12px;
     }
 
-    .action-group {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 24px;
+    .lang-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
     }
 
-    .btn {
+    .btn-lang {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 14px 18px;
-      border-radius: 8px;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 16px;
+      background: #ffffff;
+      border: 1.5px solid var(--accent);
+      border-radius: 10px;
+      color: var(--accent);
       font-family: inherit;
+      font-size: 14.5px;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.15s ease;
-      text-align: left;
-      border: 1px solid transparent;
       outline: none;
     }
 
-    .btn:active {
-      transform: scale(0.99);
+    .btn-lang .flag {
+      font-size: 18px;
+      line-height: 1;
     }
 
-    .btn-accent {
+    .btn-lang:hover {
       background: var(--accent);
       color: #ffffff;
-      border-color: var(--accent);
+      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.2);
     }
 
-    .btn-accent:hover {
-      background: var(--accent-hover);
+    .btn-lang:active {
+      transform: scale(0.98);
     }
 
-    .btn-secondary {
-      background: #ffffff;
-      color: var(--text-main);
-      border: 1px solid var(--card-border);
-    }
-
-    .btn-secondary:hover {
-      background: var(--surface);
-      border-color: #cbd5e1;
+    .restore-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 28px;
     }
 
     .btn-restore {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 18px;
       background: #ffffff;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
       color: var(--danger);
-      border: 1px solid #fee2e2;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      outline: none;
     }
 
     .btn-restore:hover {
       background: var(--danger-bg);
-      border-color: #fca5a5;
+      border-color: #f87171;
     }
 
-    .btn-title {
-      font-size: 14px;
-      font-weight: 600;
-      display: block;
+    .btn-restore:active {
+      transform: scale(0.98);
     }
 
-    .btn-desc {
-      font-size: 12px;
-      opacity: 0.85;
-      font-weight: 400;
-      margin-top: 1px;
-    }
-
-    .btn-icon {
-      font-size: 16px;
-      opacity: 0.7;
-      margin-left: 12px;
-    }
-
-    .notice-box {
-      font-size: 12.5px;
-      color: var(--text-muted);
+    .footer-divider {
       border-top: 1px solid var(--card-border);
-      padding-top: 16px;
+      padding-top: 20px;
       display: flex;
-      flex-direction: column;
-      gap: 6px;
+      justify-content: center;
     }
 
-    .notice-row {
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
+    .github-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: color 0.15s ease;
     }
 
-    .notice-bullet {
+    .github-link:hover {
       color: var(--accent);
-      font-weight: bold;
+    }
+
+    .github-icon {
+      width: 17px;
+      height: 17px;
+      fill: currentColor;
     }
 
     .toast {
@@ -258,13 +228,13 @@ const HTML = `<!DOCTYPE html>
     }
 
     .toast.success {
-      background: var(--success-bg);
-      color: var(--success);
+      background: #f0fdf4;
+      color: #15803d;
       border: 1px solid #bbf7d0;
     }
 
     .toast.error {
-      background: var(--danger-bg);
+      background: #fef2f2;
       color: var(--danger);
       border: 1px solid #fecaca;
     }
@@ -298,57 +268,36 @@ const HTML = `<!DOCTYPE html>
       <img src="/logo.png" alt="Logo" class="app-logo">
       <div class="header-text">
         <h1>IELTS Bro UI Translator</h1>
-        <p>Bản dịch giao diện ứng dụng 雅思哥 (IELTS Bro Desktop)</p>
       </div>
     </div>
 
-    <div class="info-callout">
-      <div>
-        <div style="font-weight: 600;">Ứng dụng mục tiêu</div>
-        <div class="path">C:\\Program Files\\yasige\\resources\\app.asar</div>
-      </div>
-      <div class="status-tag">Sẵn sàng</div>
-    </div>
+    <div class="section-label">Chọn ngôn ngữ:</div>
 
-    <div class="action-group">
-      <button class="btn btn-accent" onclick="applyLang('vi')">
-        <div>
-          <span class="btn-title">Cài đặt giao diện Tiếng Việt</span>
-          <span class="btn-desc">Dịch Menu, Nút bấm & Bảng điều khiển sang Tiếng Việt</span>
-        </div>
-        <span class="btn-icon">→</span>
+    <div class="lang-row">
+      <button class="btn-lang" onclick="applyLang('vi')">
+        <span class="flag">🇻🇳</span>
+        <span>Tiếng Việt</span>
       </button>
 
-      <button class="btn btn-secondary" onclick="applyLang('en')">
-        <div>
-          <span class="btn-title">Cài đặt giao diện Tiếng Anh</span>
-          <span class="btn-desc">Translate application controls and navigation to English</span>
-        </div>
-        <span class="btn-icon">→</span>
-      </button>
-
-      <button class="btn btn-restore" onclick="restoreOriginal()">
-        <div>
-          <span class="btn-title">Khôi phục giao diện gốc</span>
-          <span class="btn-desc">Quay lại bản tiếng Trung nguyên bản ban đầu</span>
-        </div>
-        <span class="btn-icon">↺</span>
+      <button class="btn-lang" onclick="applyLang('en')">
+        <span class="flag">🇬🇧</span>
+        <span>Tiếng Anh</span>
       </button>
     </div>
 
-    <div class="notice-box">
-      <div class="notice-row">
-        <span class="notice-bullet">•</span>
-        <span><strong>Dịch tự động Hybrid:</strong> Kết hợp từ điển chuyên ngành và tự động dịch câu từ mới.</span>
-      </div>
-      <div class="notice-row">
-        <span class="notice-bullet">•</span>
-        <span><strong>Bảo vệ đề thi:</strong> Giữ nguyên 100% bài đọc, bài nghe và câu hỏi tiếng Anh.</span>
-      </div>
-      <div class="notice-row">
-        <span class="notice-bullet">•</span>
-        <span><strong>An toàn tuyệt đối:</strong> Tự động sao lưu <code>app.asar.bak</code> trước khi áp dụng.</span>
-      </div>
+    <div class="restore-wrap">
+      <button class="btn-restore" onclick="restoreOriginal()">
+        <span>Khôi phục cài đặt gốc</span>
+      </button>
+    </div>
+
+    <div class="footer-divider">
+      <a href="https://github.com/ManhHung110106/ielts-bro-translator" target="_blank" class="github-link">
+        <svg class="github-icon" viewBox="0 0 16 16">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+        </svg>
+        <span>Tìm hiểu thêm về tôi?</span>
+      </a>
     </div>
   </div>
 
@@ -380,7 +329,7 @@ const HTML = `<!DOCTYPE html>
         });
         const data = await res.json();
         if (data.success) {
-          showToast('Đã áp dụng bản dịch thành công! Hãy mở IELTS Bro.', 'success', 3500);
+          showToast('Đã áp dụng thành công! Hãy mở IELTS Bro.', 'success', 3500);
         } else {
           showToast('Lỗi: ' + (data.error || 'Thao tác không thành công'), 'error', 4500);
         }
@@ -395,7 +344,7 @@ const HTML = `<!DOCTYPE html>
         const res = await fetch('/api/restore', { method: 'POST' });
         const data = await res.json();
         if (data.success) {
-          showToast('Đã khôi phục giao diện gốc thành công!', 'success', 3500);
+          showToast('Đã khôi phục cài đặt gốc thành công!', 'success', 3500);
         } else {
           showToast('Lỗi: ' + (data.error || 'Thất bại'), 'error', 4500);
         }
