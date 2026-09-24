@@ -1,32 +1,57 @@
 const fs = require('fs');
 const path = require('path');
 const asar = require('@electron/asar');
-const { exec } = require('child_process');
+const { exec, spawn } = require('child_process');
 
 const DEFAULT_APP_PATH = 'C:\\Program Files\\yasige\\resources\\app.asar';
 
 function killApp() {
   return new Promise((resolve) => {
-    const cmd = `powershell -NoProfile -Command "Get-CimInstance Win32_Process | Where-Object { $_.ExecutablePath -like '*yasige*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }"`;
-    exec(cmd, () => {
-      setTimeout(resolve, 800);
+    // Kill IELTS Bro and any lingering updater or node processes running in yasige
+    const ps = `Get-CimInstance Win32_Process | Where-Object { $_.ExecutablePath -like '*yasige*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }`;
+    exec(`powershell -NoProfile -Command "${ps}"`, () => {
+      setTimeout(resolve, 1000);
     });
   });
+}
+
+function launchApp() {
+  try {
+    const installDir = 'C:\\Program Files\\yasige';
+    if (!fs.existsSync(installDir)) return false;
+    const files = fs.readdirSync(installDir);
+    const exe = files.find(f => f.endsWith('.exe') && !f.toLowerCase().includes('uninstall'));
+    if (!exe) return false;
+    const exePath = path.join(installDir, exe);
+    const child = spawn(exePath, [], {
+      cwd: installDir,
+      detached: true,
+      stdio: 'ignore'
+    });
+    child.unref();
+    console.log('[Patcher] IELTS Bro launched automatically.');
+    return true;
+  } catch (err) {
+    console.error('[Patcher] Failed to launch IELTS Bro:', err.message);
+    return false;
+  }
 }
 
 async function patch(asarPath = DEFAULT_APP_PATH, lang = 'vi') {
   console.log(`[Patcher] Closing running IELTS Bro instances...`);
   await killApp();
 
-  if (!fs.existsSync(asarPath)) {
-    throw new Error(`Khong tim thay file app.asar tai: ${asarPath}`);
-  }
-
   const backupPath = asarPath + '.bak';
   if (!fs.existsSync(backupPath)) {
+    if (!fs.existsSync(asarPath)) {
+      throw new Error(`Khong tim thay file app.asar tai: ${asarPath}`);
+    }
     console.log(`[Patcher] Tao file sao luu tai ${backupPath}...`);
     fs.copyFileSync(asarPath, backupPath);
   }
+
+  // ALWAYS extract from the pristine clean backup to prevent file degradation
+  const sourceToExtract = fs.existsSync(backupPath) ? backupPath : asarPath;
 
   const tempExtractDir = path.join(__dirname, 'temp_patch');
   if (fs.existsSync(tempExtractDir)) {
@@ -34,7 +59,7 @@ async function patch(asarPath = DEFAULT_APP_PATH, lang = 'vi') {
   }
 
   console.log(`[Patcher] Dang giai nen app.asar...`);
-  asar.extractAll(asarPath, tempExtractDir);
+  asar.extractAll(sourceToExtract, tempExtractDir);
 
   const preloadPath = path.join(tempExtractDir, '.webpack', 'renderer', 'main_window', 'preload.js');
   if (!fs.existsSync(preloadPath)) {
@@ -105,43 +130,11 @@ async function restore(asarPath = DEFAULT_APP_PATH) {
 function getStatus(asarPath = DEFAULT_APP_PATH) {
   const exists = fs.existsSync(asarPath);
   const hasBackup = fs.existsSync(asarPath + '.bak');
-  let currentLang = 'unknown';
-
-  if (exists) {
-    try {
-      const header = fs.readFileSync(asarPath, { encoding: 'utf8', flag: 'r' }).slice(0, 5000);
-      // We can also inspect backup status
-    } catch {}
-  }
-
   return {
     appInstalled: exists,
     hasBackup: hasBackup,
     appPath: asarPath
   };
-}
-
-function launchApp() {
-  try {
-    const installDir = 'C:\\Program Files\\yasige';
-    if (!fs.existsSync(installDir)) return false;
-    const files = fs.readdirSync(installDir);
-    const exe = files.find(f => f.endsWith('.exe') && !f.toLowerCase().includes('uninstall'));
-    if (!exe) return false;
-    const exePath = path.join(installDir, exe);
-    const { spawn } = require('child_process');
-    const child = spawn(exePath, [], {
-      cwd: installDir,
-      detached: true,
-      stdio: 'ignore'
-    });
-    child.unref();
-    console.log('[Patcher] IELTS Bro launched automatically.');
-    return true;
-  } catch (err) {
-    console.error('[Patcher] Failed to launch IELTS Bro:', err.message);
-    return false;
-  }
 }
 
 module.exports = {
@@ -151,3 +144,19 @@ module.exports = {
   killApp,
   launchApp
 };
+
+if (require.main === module) {
+  const action = process.argv[2] || 'patch';
+  const lang = process.argv[3] || 'vi';
+  if (action === 'restore') {
+    restore().catch(err => {
+      console.error(err);
+      process.exit(1);
+    });
+  } else {
+    patch(DEFAULT_APP_PATH, lang).catch(err => {
+      console.error(err);
+      process.exit(1);
+    });
+  }
+}
