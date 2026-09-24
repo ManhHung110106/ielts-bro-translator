@@ -87,3 +87,16 @@ Chúc các bạn có một quá trình ôn luyện thật hiệu quả và đạ
 Nếu bạn thấy công cụ này hữu ích và tiết kiệm thời gian cho bạn:
 - Hãy dành tặng dự án **1 sao (⭐ Star)** ở góc phải trên cùng của repository này nhé!
 - Mọi sự đóng góp và ủng hộ (**Sponsor / Donate**) qua [GitHub Sponsors](https://github.com/sponsors/ManhHung110106) sẽ là nguồn động viên to lớn để tôi tiếp tục duy trì và cập nhật thêm nhiều tính năng hay hơn nữa cho cộng đồng!
+---
+
+## 📜 Giấy Phép & Bản Quyền (License)
+
+Dự án này được cấp phép với các điều kiện cụ thể sau:
+
+1. **Mã nguồn (Source Code)**:
+   - Được phép tự do sử dụng, chỉnh sửa, phát triển tiếp hoặc tích hợp vào các dự án khác với điều kiện **bắt buộc phải ghi rõ nguồn và tác giả gốc** (Nguyễn Mạnh Hùng - [ManhHung110106](https://github.com/ManhHung110106)).
+2. **Hình ảnh & Logo (Branding Assets)**:
+   - Toàn bộ hình ảnh, biểu tượng (`logo.png`, thư mục `icons/`, và các ấn phẩm thiết kế giao diện) thuộc quyền sở hữu trí tuệ độc quyền của tác giả.
+   - **Nghiêm cấm** sao chép, sử dụng lại hoặc lạm dụng bộ nhận diện/logo này dưới bất kỳ hình thức nào (kể cả hoạt động thương mại có lợi nhuận hoặc phi lợi nhuận) nếu **chưa có sự đồng ý bằng văn bản** từ tác giả.
+
+Chi tiết xem tại file [LICENSE](LICENSE).
