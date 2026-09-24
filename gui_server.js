@@ -1,7 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { patch, restore, getStatus } = require('./patcher');
+const { patch, restore, getStatus, launchApp } = require('./patcher');
 
 const PORT = 38292;
 
@@ -329,7 +329,7 @@ const HTML = `<!DOCTYPE html>
         });
         const data = await res.json();
         if (data.success) {
-          showToast('Đã áp dụng thành công! Hãy mở IELTS Bro.', 'success', 3500);
+          showToast('Đã áp dụng thành công! Đang tự động mở IELTS Bro...', 'success', 3500);
         } else {
           showToast('Lỗi: ' + (data.error || 'Thao tác không thành công'), 'error', 4500);
         }
@@ -386,6 +386,9 @@ const server = http.createServer(async (req, res) => {
       try {
         const { lang } = JSON.parse(body || '{}');
         await patch(undefined, lang || 'vi');
+        setTimeout(() => {
+          launchApp();
+        }, 600);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true }));
       } catch (err) {

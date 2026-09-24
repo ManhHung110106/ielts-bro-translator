@@ -121,25 +121,33 @@ function getStatus(asarPath = DEFAULT_APP_PATH) {
   };
 }
 
+function launchApp() {
+  try {
+    const installDir = 'C:\\Program Files\\yasige';
+    if (!fs.existsSync(installDir)) return false;
+    const files = fs.readdirSync(installDir);
+    const exe = files.find(f => f.endsWith('.exe') && !f.toLowerCase().includes('uninstall'));
+    if (!exe) return false;
+    const exePath = path.join(installDir, exe);
+    const { spawn } = require('child_process');
+    const child = spawn(exePath, [], {
+      cwd: installDir,
+      detached: true,
+      stdio: 'ignore'
+    });
+    child.unref();
+    console.log('[Patcher] IELTS Bro launched automatically.');
+    return true;
+  } catch (err) {
+    console.error('[Patcher] Failed to launch IELTS Bro:', err.message);
+    return false;
+  }
+}
+
 module.exports = {
   patch,
   restore,
   getStatus,
-  killApp
+  killApp,
+  launchApp
 };
-
-if (require.main === module) {
-  const action = process.argv[2] || 'patch';
-  const lang = process.argv[3] || 'vi';
-  if (action === 'restore') {
-    restore().catch(err => {
-      console.error(err);
-      process.exit(1);
-    });
-  } else {
-    patch(DEFAULT_APP_PATH, lang).catch(err => {
-      console.error(err);
-      process.exit(1);
-    });
-  }
-}
