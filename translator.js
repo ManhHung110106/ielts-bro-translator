@@ -1,43 +1,102 @@
-﻿(function() {
+(function() {
   'use strict';
 
-  // Config: 'vi' or 'en'
   const TARGET_LANG = window.__IELTS_BRO_LANG__ || 'vi';
-
-  // Dictionary loaded in runtime
   let DICT = window.__IELTS_BRO_DICT__ || {};
-
-  // Sort keys by descending length to match longest phrases first
   let sortedKeys = Object.keys(DICT).sort((a, b) => b.length - a.length);
 
-  function updateDict(newDict) {
-    DICT = newDict;
-    sortedKeys = Object.keys(DICT).sort((a, b) => b.length - a.length);
+  // LocalStorage Cache for dynamic translations
+  const CACHE_KEY = '__IELTS_BRO_CACHE_' + TARGET_LANG + '__';
+  let dynamicCache = {};
+  try {
+    dynamicCache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+  } catch (e) {
+    dynamicCache = {};
   }
 
-  // Regex to detect Chinese characters
-  const CHINESE_REGEX = /[\u4e00-\u9fa5]/;
+  function saveCache() {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify(dynamicCache));
+    } catch (e) {}
+  }
 
-  // Cache to avoid translating identical strings repeatedly
-  const translationCache = new Map();
+  const CHINESE_REGEX = /[\u4e00-\u9fa5]/;
+  const translationMemory = new Map();
+
+  // Pending queue for batch dynamic translation API
+  let pendingQueue = new Set();
+  let debounceTimer = null;
+
+  async function fetchTranslations(texts) {
+    if (!texts.length) return;
+    const combined = texts.join('\n');
+    try {
+      const targetCode = TARGET_LANG === 'en' ? 'en' : 'vi';
+      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-CN&tl=${targetCode}&dt=t&q=${encodeURIComponent(combined)}`;
+      const res = await fetch(url);
+      const json = await res.json();
+      if (json && json[0]) {
+        const translatedCombined = json[0].map(x => x[0]).join('');
+        const results = translatedCombined.split('\n');
+        texts.forEach((orig, idx) => {
+          if (results[idx]) {
+            const clean = results[idx].trim();
+            dynamicCache[orig] = clean;
+            translationMemory.set(orig, clean);
+          }
+        });
+        saveCache();
+        // Re-run DOM pass to apply newly fetched translations
+        if (document.body) translateNode(document.body);
+      }
+    } catch (err) {
+      console.warn('[IELTS-Bro-Translator] Dynamic translation notice:', err.message);
+    }
+  }
+
+  function queueForTranslation(text) {
+    if (!text || !CHINESE_REGEX.test(text)) return;
+    if (dynamicCache[text] || translationMemory.has(text) || pendingQueue.has(text)) return;
+    pendingQueue.add(text);
+
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      const list = Array.from(pendingQueue).slice(0, 30);
+      list.forEach(item => pendingQueue.delete(item));
+      fetchTranslations(list);
+    }, 400);
+  }
 
   function translateText(text) {
     if (!text || !CHINESE_REGEX.test(text)) {
       return text;
     }
 
-    if (translationCache.has(text)) {
-      return translationCache.get(text);
+    if (translationMemory.has(text)) {
+      return translationMemory.get(text);
     }
 
+    if (dynamicCache[text]) {
+      translationMemory.set(text, dynamicCache[text]);
+      return dynamicCache[text];
+    }
+
+    // Step 1: Check curated dictionary replacement
     let result = text;
+    let matched = false;
     for (const key of sortedKeys) {
       if (result.includes(key)) {
         result = result.replaceAll(key, DICT[key]);
+        matched = true;
       }
     }
 
-    translationCache.set(text, result);
+    // If still contains Chinese characters, queue for dynamic AI/API translation
+    if (CHINESE_REGEX.test(result)) {
+      queueForTranslation(text.trim());
+    }
+
+    translationMemory.set(text, result);
     return result;
   }
 
@@ -46,16 +105,19 @@
     const parent = node.parentElement;
     if (!parent) return true;
 
-    // Skip script, style, code, audio, video tags
     const tag = parent.tagName ? parent.tagName.toUpperCase() : '';
     if (['SCRIPT', 'STYLE', 'CODE', 'PRE', 'NOSCRIPT', 'TEXTAREA'].includes(tag)) {
       return true;
     }
 
-    // Crucial rule: Never translate IELTS Exam Reading/Listening/Questions content
-    // Check if parent has exam question/passage identifiers
+    // Guard: Never translate IELTS test content (Reading, Listening transcripts, etc.)
     const className = (parent.className && typeof parent.className === 'string') ? parent.className : '';
-    if (className.includes('passage-content') || className.includes('article-content') || className.includes('reading-article')) {
+    if (
+      className.includes('passage-content') ||
+      className.includes('article-content') ||
+      className.includes('reading-article') ||
+      className.includes('question-text')
+    ) {
       return true;
     }
 
@@ -73,7 +135,6 @@
         }
       }
     } else if (node.nodeType === Node.ELEMENT_NODE) {
-      // Translate attributes: placeholder, title, aria-label
       for (const attr of ['placeholder', 'title', 'aria-label']) {
         const val = node.getAttribute(attr);
         if (val && CHINESE_REGEX.test(val)) {
@@ -81,14 +142,12 @@
         }
       }
 
-      // Traverse children
       for (let child = node.firstChild; child; child = child.nextSibling) {
         translateNode(child);
       }
     }
   }
 
-  // Observe DOM changes
   const observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       if (mutation.type === 'characterData') {
@@ -130,10 +189,5 @@
     startObserver();
   }
 
-  window.__IELTS_BRO_TRANSLATOR__ = {
-    translateText,
-    updateDict
-  };
-
-  console.log('[IELTS-Bro-Translator] Loaded successfully. Target Language:', TARGET_LANG);
+  console.log('[IELTS-Bro-Translator] Dynamic Hybrid Translator loaded. Target:', TARGET_LANG);
 })();
