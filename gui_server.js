@@ -15,7 +15,7 @@ function getMimeType(filePath) {
   }
 }
 
-const HTML = <!DOCTYPE html>
+const HTML = `<!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
@@ -355,7 +355,7 @@ const HTML = <!DOCTYPE html>
   </script>
 </body>
 </html>
-;
+`;
 
 const server = http.createServer(async (req, res) => {
   if (req.method === 'GET' && req.url === '/logo.png') {
@@ -413,5 +413,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, '127.0.0.1', () => {
-  console.log([GUI Server] Running at http://127.0.0.1:);
+  console.log(`[GUI Server] Running at http://127.0.0.1:${PORT}`);
 });
