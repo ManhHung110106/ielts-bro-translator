@@ -56,7 +56,7 @@ Nhằm hỗ trợ cộng đồng người Việt tự học và ôn luyện IELT
 #### 🌟 Cách 1: Dịch Ứng Dụng Desktop (Desktop App)
 *Dành cho bạn nào đã tải phần mềm IELTS Bro về máy tính Windows.*
 
-1. Tải dự án này về máy ([Tải file ZIP](https://github.com/ManhHung110106/ielts-bro-translator/archive/refs/heads/main.zip) hoặc `git clone`).
+1. Tải dự án này về máy ([Tải bản Release v1.0.0 (ZIP)](https://github.com/ManhHung110106/ielts-bro-translator/releases/latest) hoặc `git clone`).
 2. Mở thư mục và click đúp vào file **`run_translator.bat`**.
 3. Cửa sổ ứng dụng sẽ mở lên:
    - Nhấn **🇻🇳 Tiếng Việt** hoặc **🇬🇧 Tiếng Anh**.
@@ -68,7 +68,7 @@ Nhằm hỗ trợ cộng đồng người Việt tự học và ôn luyện IELT
 #### 🌐 Cách 2: Dịch Trực Tiếp Trên Nền Tảng Web (Chrome Extension)
 *Dành cho bạn nào làm bài thi trực tiếp trên trình duyệt tại [pc-new.ieltsbro.com](https://pc-new.ieltsbro.com/).*
 
-1. Tải thư mục dự án này về máy tính.
+1. Tải bộ cài từ mục [Releases](https://github.com/ManhHung110106/ielts-bro-translator/releases/latest) (hoặc tải toàn bộ mã nguồn về máy).
 2. Mở trình duyệt Chrome (hoặc Edge, Cốc Cốc, Brave).
 3. Truy cập vào đường dẫn quản lý tiện ích:
    - Trên Chrome: `chrome://extensions`
